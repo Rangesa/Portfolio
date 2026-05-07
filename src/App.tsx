@@ -148,6 +148,24 @@ function App() {
         </div>
       </section>
 
+      <section id="gallery">
+        <h2>Gallery / Works</h2>
+        <div className="gallery-grid">
+          <div className="gallery-item">
+            <img src="./projects/sample1.png" alt="Work 1" />
+          </div>
+          <div className="gallery-item">
+            <img src="./projects/sample2.png" alt="Work 2" />
+          </div>
+          <div className="gallery-item">
+            <img src="./projects/sample3.png" alt="Work 3" />
+          </div>
+          <div className="gallery-item">
+            <img src="./projects/sample4.png" alt="Work 4" />
+          </div>
+        </div>
+      </section>
+
       <section id="contact">
         <h2>Contact</h2>
         <div className="contact-box">
