@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #111; }
+.title { font-size: 28px; font-weight: 700; }
+.box { fill: #fff; stroke: #222; stroke-width: 2; rx: 14; }
+.label { font-size: 20px; font-weight: 700; }
+.small { font-size: 16px; }
+.arrow { stroke: #222; stroke-width: 3; marker-end: url(#a); }
+.dash { stroke-dasharray: 10 8; }
+</style>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#222"/></marker></defs>
+<text x="640" y="50" text-anchor="middle" class="title">Read-only FPGA-Assisted Memory Acquisition Architecture</text>
+<rect class="box" x="60" y="150" width="245" height="120"/>
+<text x="182" y="195" text-anchor="middle" class="label">Windows Target</text>
+<text x="182" y="225" text-anchor="middle" class="small">Controlled lab system</text>
+<rect class="box" x="380" y="150" width="245" height="120"/>
+<text x="502" y="193" text-anchor="middle" class="label">PCIe FPGA</text>
+<text x="502" y="222" text-anchor="middle" class="small">Artix-7 XC7A75T</text>
+<text x="502" y="246" text-anchor="middle" class="small">Read-only acquisition path</text>
+<rect class="box" x="700" y="150" width="245" height="120"/>
+<text x="822" y="193" text-anchor="middle" class="label">FT601 / USB 3</text>
+<text x="822" y="222" text-anchor="middle" class="small">Host transport</text>
+<rect class="box" x="1000" y="150" width="220" height="120"/>
+<text x="1110" y="193" text-anchor="middle" class="label">Analysis Host</text>
+<text x="1110" y="222" text-anchor="middle" class="small">Windows workstation</text>
+<line class="arrow" x1="305" y1="210" x2="380" y2="210"/>
+<line class="arrow" x1="625" y1="210" x2="700" y2="210"/>
+<line class="arrow" x1="945" y1="210" x2="1000" y2="210"/>
+<rect class="box" x="890" y="365" width="220" height="105"/>
+<text x="1000" y="405" text-anchor="middle" class="label">MemProcFS</text>
+<text x="1000" y="435" text-anchor="middle" class="small">Acquisition API</text>
+<rect class="box" x="550" y="365" width="260" height="105"/>
+<text x="680" y="405" text-anchor="middle" class="label">MemoryReader</text>
+<text x="680" y="435" text-anchor="middle" class="small">Backend abstraction</text>
+<rect class="box" x="210" y="365" width="260" height="105"/>
+<text x="340" y="405" text-anchor="middle" class="label">Validation Layer</text>
+<text x="340" y="435" text-anchor="middle" class="small">PE / section / AOB checks</text>
+<rect class="box" x="550" y="555" width="260" height="105"/>
+<text x="680" y="595" text-anchor="middle" class="label">WinAPI Baseline</text>
+<text x="680" y="625" text-anchor="middle" class="small">Controlled comparison backend</text>
+<line class="arrow" x1="1110" y1="270" x2="1025" y2="365"/>
+<line class="arrow" x1="890" y1="417" x2="810" y2="417"/>
+<line class="arrow" x1="550" y1="417" x2="470" y2="417"/>
+<line class="arrow dash" x1="680" y1="555" x2="680" y2="470"/>
+<text x="640" y="700" text-anchor="middle" class="small">Figure 1. Experimental architecture. Dashed path denotes the software baseline used for consistency checks.</text>
+</svg>
