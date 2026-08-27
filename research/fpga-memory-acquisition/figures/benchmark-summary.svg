@@ -1,28 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="620" viewBox="0 0 1280 620">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="650" viewBox="0 0 1280 650">
 <style>
 text { font-family: Arial, Helvetica, sans-serif; fill:#111; }
 .title { font-size:28px; font-weight:700; }
-.metric { font-size:44px; font-weight:700; }
-.label { font-size:20px; font-weight:700; }
-.small { font-size:16px; }
+.metric { font-size:40px; font-weight:700; }
+.label { font-size:19px; font-weight:700; }
+.small { font-size:15px; }
 .card { fill:#fff; stroke:#222; stroke-width:2; rx:16; }
 </style>
-<text x="640" y="55" text-anchor="middle" class="title">Measured Acquisition Summary</text>
-<rect class="card" x="70" y="130" width="340" height="300"/>
-<text x="240" y="190" text-anchor="middle" class="label">DMA throughput</text>
-<text x="240" y="285" text-anchor="middle" class="metric">18.91</text>
-<text x="240" y="325" text-anchor="middle" class="label">MiB/s</text>
-<text x="240" y="375" text-anchor="middle" class="small">Duck's DMA Test</text>
-<rect class="card" x="470" y="130" width="340" height="300"/>
-<text x="640" y="190" text-anchor="middle" class="label">FT601 latency</text>
-<text x="640" y="285" text-anchor="middle" class="metric">270.58</text>
-<text x="640" y="325" text-anchor="middle" class="label">µs average</text>
-<text x="640" y="375" text-anchor="middle" class="small">64-byte transfer × 500</text>
-<rect class="card" x="870" y="130" width="340" height="300"/>
-<text x="1040" y="190" text-anchor="middle" class="label">Probe success</text>
-<text x="1040" y="285" text-anchor="middle" class="metric">97.604%</text>
-<text x="1040" y="325" text-anchor="middle" class="label">63,966 / 65,536</text>
-<text x="1040" y="375" text-anchor="middle" class="small">256-MiB probe; retry = 0</text>
-<text x="640" y="500" text-anchor="middle" class="small">Figure 2. Directly measured or mathematically derived values from the recorded acceptance tests.</text>
-<text x="640" y="530" text-anchor="middle" class="small">The three panels use different units and are not intended as a comparative bar chart.</text>
+<text x="640" y="55" text-anchor="middle" class="title">Rollout-Backed Acquisition Acceptance Summary</text>
+<rect class="card" x="45" y="125" width="270" height="310"/>
+<text x="180" y="180" text-anchor="middle" class="label">256-byte read</text>
+<text x="180" y="275" text-anchor="middle" class="metric">PASS</text>
+<text x="180" y="325" text-anchor="middle" class="small">EXIT=0</text>
+<text x="180" y="350" text-anchor="middle" class="small">memory contents returned</text>
+<text x="180" y="375" text-anchor="middle" class="small">for physical 0x1000</text>
+<rect class="card" x="350" y="125" width="270" height="310"/>
+<text x="485" y="180" text-anchor="middle" class="label">4-KiB TLP read</text>
+<text x="485" y="265" text-anchor="middle" class="metric">32 / 32</text>
+<text x="485" y="310" text-anchor="middle" class="small">MRd32 / CplD</text>
+<text x="485" y="345" text-anchor="middle" class="small">tags 01–20</text>
+<text x="485" y="370" text-anchor="middle" class="small">sequence matched</text>
+<rect class="card" x="655" y="125" width="270" height="310"/>
+<text x="790" y="180" text-anchor="middle" class="label">0–256 MiB probe</text>
+<text x="790" y="260" text-anchor="middle" class="metric">97.604%</text>
+<text x="790" y="305" text-anchor="middle" class="small">63,966 / 65,536 pages</text>
+<text x="790" y="345" text-anchor="middle" class="small">UR = 1,570</text>
+<text x="790" y="370" text-anchor="middle" class="small">retry / exhausted / protocol = 0</text>
+<rect class="card" x="960" y="125" width="270" height="310"/>
+<text x="1095" y="180" text-anchor="middle" class="label">Backend consistency</text>
+<text x="1095" y="275" text-anchor="middle" class="metric">PASS</text>
+<text x="1095" y="325" text-anchor="middle" class="small">WinAPI = MemProcFS DMA</text>
+<text x="1095" y="350" text-anchor="middle" class="small">module / PE / section</text>
+<text x="1095" y="375" text-anchor="middle" class="small">pattern readback matched</text>
+<text x="640" y="505" text-anchor="middle" class="small">Figure 2. Only values verified from direct CommandExecution stdout in the supplied rollout JSONL are shown.</text>
+<text x="640" y="535" text-anchor="middle" class="small">The 97.604% value is derived from 63,966 / 65,536; the console itself displayed integer-rounded 97%.</text>
+<text x="640" y="575" text-anchor="middle" class="small">Earlier 18.91 MiB/s throughput and 270.58 µs latency records are intentionally omitted until their source logs are attached.</text>
 </svg>
