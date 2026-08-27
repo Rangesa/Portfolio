@@ -1,0 +1,8 @@
+metric,value,unit,sample_or_count,status,notes
+DMA sequential read throughput,18.91,MiB/s,Duck's DMA Test,measured,Observed host-side DMA benchmark
+FT601 small-transfer latency,270.58,us,64 B x 500,measured,Average latency from ft601_bench
+256-byte DMA read,PASS,,single acceptance test,measured,Read-only backend acceptance
+4-KiB DMA read,PASS,,single acceptance test,measured,Read-only backend acceptance
+256-MiB probe successful regions,63966,regions,65536 attempted,measured,No retries recorded
+256-MiB probe success rate,97.604,%,63966 / 65536,derived,Derived from measured region counts
+Probe retries,0,retries,256-MiB probe,measured,Retry counter observed as zero
