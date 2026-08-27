@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="620" viewBox="0 0 1280 620">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill:#111; }
+.title { font-size:28px; font-weight:700; }
+.metric { font-size:44px; font-weight:700; }
+.label { font-size:20px; font-weight:700; }
+.small { font-size:16px; }
+.card { fill:#fff; stroke:#222; stroke-width:2; rx:16; }
+</style>
+<text x="640" y="55" text-anchor="middle" class="title">Measured Acquisition Summary</text>
+<rect class="card" x="70" y="130" width="340" height="300"/>
+<text x="240" y="190" text-anchor="middle" class="label">DMA throughput</text>
+<text x="240" y="285" text-anchor="middle" class="metric">18.91</text>
+<text x="240" y="325" text-anchor="middle" class="label">MiB/s</text>
+<text x="240" y="375" text-anchor="middle" class="small">Duck's DMA Test</text>
+<rect class="card" x="470" y="130" width="340" height="300"/>
+<text x="640" y="190" text-anchor="middle" class="label">FT601 latency</text>
+<text x="640" y="285" text-anchor="middle" class="metric">270.58</text>
+<text x="640" y="325" text-anchor="middle" class="label">µs average</text>
+<text x="640" y="375" text-anchor="middle" class="small">64-byte transfer × 500</text>
+<rect class="card" x="870" y="130" width="340" height="300"/>
+<text x="1040" y="190" text-anchor="middle" class="label">Probe success</text>
+<text x="1040" y="285" text-anchor="middle" class="metric">97.604%</text>
+<text x="1040" y="325" text-anchor="middle" class="label">63,966 / 65,536</text>
+<text x="1040" y="375" text-anchor="middle" class="small">256-MiB probe; retry = 0</text>
+<text x="640" y="500" text-anchor="middle" class="small">Figure 2. Directly measured or mathematically derived values from the recorded acceptance tests.</text>
+<text x="640" y="530" text-anchor="middle" class="small">The three panels use different units and are not intended as a comparative bar chart.</text>
+</svg>
