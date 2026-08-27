@@ -7,7 +7,7 @@
 
 ## Abstract
 
-This report evaluates the reliability of a read-only FPGA-assisted external memory-acquisition setup in a controlled Windows laboratory environment. The prototype uses an Artix-7 FPGA and FT601 transport together with a memory-analysis stack and a common software abstraction for hardware-assisted and WinAPI-based reads. Recorded acceptance measurements include 18.91 MiB/s host-side DMA throughput, 270.58 µs average latency for 64-byte transfers across 500 iterations, successful 256-byte and 4-KiB DMA reads, and 63,966 successful regions out of 65,536 during a 256-MiB probe (97.604%), with zero recorded retries.
+This report evaluates a read-only FPGA-assisted external memory-acquisition setup in a controlled Windows laboratory environment. The prototype uses an Artix-7 FPGA and FT601 transport together with a memory-analysis stack and a common abstraction for hardware-assisted and WinAPI-based reads. Direct command-output evidence preserved from the supplied rollout records shows a successful 256-byte physical-memory read, a 4-KiB transaction sequence containing 32 MRd32 requests and 32 matching CplD completions, a bounded 0–256 MiB probe with 63,966 pages read out of 65,536, and a WinAPI/MemProcFS DMA backend acceptance run with matching process, module, PE, section, and pattern results.
 
 ![Architecture](figures/architecture.svg)
 
@@ -21,86 +21,125 @@ The implementation described here is intentionally read-only. Memory writing, co
 
 The acquisition pipeline consists of a Windows target system, a PCIe-attached Artix-7 FPGA, an FT601-based USB transport path, and a separate analysis host. On the software side, the external acquisition path is exposed through MemProcFS-compatible tooling and a common `MemoryReader` abstraction. A WinAPI backend is retained as a controlled baseline for consistency checks.
 
-See Figure 1 above.
+## 3. Evidence Method
 
-## 3. Validation Method
+The supplied Codex rollout JSONL was inspected for command-execution records rather than relying on assistant summaries. Direct stdout was recovered for:
 
-Validation was divided into four layers:
+1. a 256-byte PCILeech physical-memory display;
+2. a 4-KiB TLP-level read test;
+3. a bounded 0–256 MiB PCILeech probe;
+4. a WinAPI/MemProcFS DMA backend comparison;
+5. a Release x64 build and unit-test run.
 
-1. **Transport validation.** Confirm that data can be transferred repeatedly over the FPGA/FT601 path.
-2. **Read-size validation.** Confirm successful reads at small (256 B) and page-sized (4 KiB) granularity.
-3. **Address-space probing.** Probe a larger 256-MiB region and record successful versus attempted regions and retries.
-4. **Structural validation.** Confirm recognizable Windows executable structures such as PE headers, module metadata, executable sections, and expected byte patterns.
+A sanitized evidence extract, source event timestamps, and source-file SHA-256 are stored in [`evidence/2026-08-27-acceptance.md`](evidence/2026-08-27-acceptance.md).
 
-The structural layer is important because a successful low-level transfer does not by itself establish that the retrieved bytes are semantically correct.
+## 4. Rollout-Backed Measurements
 
-## 4. Recorded Measurements
-
-| Measurement | Result | Provenance |
+| Measurement | Result | Evidence status |
 |---|---:|---|
-| DMA sequential read throughput | **18.91 MiB/s** | Duck's DMA Test |
-| FT601 64-byte average latency | **270.58 µs** | 500 iterations |
-| 256-byte DMA read | **PASS** | Acceptance test |
-| 4-KiB DMA read | **PASS** | Acceptance test |
-| 256-MiB probe | **63,966 / 65,536** successful regions | Acceptance test |
-| Derived probe success rate | **97.604%** | Computed from counts above |
-| Recorded retries | **0** | Probe counter |
+| 256-byte physical-memory read | **PASS** | Direct command stdout |
+| 4-KiB TLP requests | **32 MRd32** | Counted from direct command stdout |
+| 4-KiB TLP completions | **32 CplD** | Counted from direct command stdout |
+| TLP tag sequence | **01–20 matched** | Deterministic comparison of stdout |
+| 0–256 MiB probe | **63,966 / 65,536 pages read** | Direct command stdout |
+| Probe failures / UR | **1,570** | Direct command stdout |
+| Probe retries | **0** | Direct command stdout |
+| Exhausted reads | **0** | Direct command stdout |
+| Protocol failures | **0** | Direct command stdout |
+| Derived page-read rate | **97.604%** | Computed from direct counts |
+| WinAPI / DMA backend acceptance | **PASS** | Direct command stdout |
+| ReaderUnitTests | **PASS** | Direct command stdout |
+| Release x64 build | **PASS** | Exit code 0 |
 
 ![Benchmark summary](figures/benchmark-summary.svg)
 
-The raw values used by this report are stored in [`data/measurements.csv`](data/measurements.csv).
+The machine-readable provenance table is stored in [`data/measurements.csv`](data/measurements.csv).
 
-## 5. Results
+## 5. Acceptance Results
 
-The recorded tests demonstrate that the acquisition path was capable of retrieving both small and page-sized regions and of sustaining a larger address-space probe without recorded retries. The 256-MiB probe yielded 63,966 successful regions out of 65,536 attempts, corresponding to a derived success rate of 97.604%.
+### 5.1 256-byte read
 
-The observed 18.91 MiB/s throughput should be treated as an empirical property of this specific host/device/software configuration rather than a general performance claim about PCILeech-compatible FPGA hardware.
+The recorded PCILeech command returned `EXIT=0` and printed memory contents for physical address `0x1000`. This establishes that the acquisition path returned actual memory bytes for the bounded read in that run.
 
-Similarly, the measured 270.58 µs average for 64-byte transfers represents the recorded test configuration and should not be generalized to other FT601 implementations without independent measurement.
+### 5.2 4-KiB transaction sequence
 
-## 6. Engineering Findings
+The recorded TLP output contains 32 `MRd32` requests and 32 `CplD` completions. Request and completion tag sequences both run from hexadecimal `01` through `20` in the same order.
 
-A key practical issue was separating hardware transport failures from software initialization failures. In the test environment, optional network-dependent symbol-resolution behavior could introduce delays or initialization failures unrelated to the underlying FPGA memory transport.
+This result is stronger than a high-level “PASS” flag because it preserves the transaction-level request/completion relationship.
 
-Disabling unnecessary network-dependent components improved reproducibility in the isolated test setup.
+### 5.3 Bounded memory probe
 
-A second finding was that acquisition and interpretation must be treated as separate research layers. Obtaining bytes reliably is substantially easier than reconstructing the semantics of undocumented native runtime structures. Strong structural validation therefore remains necessary before higher-level reverse-engineering conclusions are accepted.
+The final probe output records:
 
-## 7. Limitations
+```text
+Pages read:     63966 / 65536
+Pages failed:   1570
+FPGA read outcomes [first_failed=1570, ur=1570, ca=0, retry=0, recovered=0, exhausted=0, protocol=0]
+```
+
+The derived page-read fraction is **97.604%**. This fraction should not be interpreted as a transport bit-error rate: failed pages can reflect addressability or target-memory mapping behavior.
+
+### 5.4 Backend consistency
+
+A later acceptance run reported identical WinAPI and MemProcFS DMA values for:
+
+- PID;
+- module name, base, and size;
+- DOS and PE64 validation;
+- scatter-read validation;
+- executable-section count;
+- `.text` RVA and size;
+- pattern RVA;
+- pattern readback.
+
+Both paths returned `RESULT=PASS`, followed by `backend_acceptance: PASS`.
+
+## 6. Engineering Finding: Offline Initialization
+
+Earlier backend attempts stalled or failed during VMM initialization. The tested implementation subsequently added:
+
+- `-disable-symbolserver`
+- `-disable-symbols`
+- `-disable-python`
+
+After this change, the recorded acceptance run completed successfully. This illustrates why acquisition transport and optional analysis-framework initialization dependencies should be tested separately.
+
+## 7. Additional Project Measurements Not Yet Rollout-Backed
+
+Earlier project records contain the following values:
+
+- `18.91 MiB/s` DMA throughput;
+- `270.58 µs` average latency for 64-byte FT601 transfers across 500 iterations.
+
+Exact matching raw lines for those values were not found in the five rollout files supplied on 2026-08-28. They are therefore retained as **pending-source measurements**, not used as direct evidence in the abstract or primary results.
+
+## 8. Limitations
 
 This report has several limitations:
 
-- The benchmark set is small and does not yet provide confidence intervals.
-- Throughput and latency measurements were collected on a single hardware/software configuration.
-- The 256-MiB probe success rate includes addressability/mapping effects and is not equivalent to a transport bit-error rate.
-- No claim of peer review, independent replication, or academic publication is made.
-- Measurements listed as “measured” are preserved from the project's recorded acceptance-test results; the percentage is explicitly marked as derived.
+- the evidence set represents a small number of acceptance runs rather than a statistical benchmark campaign;
+- testing was performed on one hardware/software configuration;
+- the source rollouts are preserved privately and only sanitized extracts are published;
+- no independent replication has been performed;
+- no claim of peer review, academic publication, CVE assignment, or DOI is made.
 
-## 8. Reproducibility
+## 9. Reproducibility and Provenance
 
-Future revisions should record:
+The repository publishes SHA-256 hashes for the five supplied rollout files in [`evidence/source-rollouts.sha256`](evidence/source-rollouts.sha256). This allows a holder of the source files to verify that an evidence extraction refers to the same underlying rollouts.
 
-- exact FPGA firmware revision;
-- MemProcFS/LeechCore version;
-- FT601 driver version;
-- motherboard/chipset and PCIe link state;
-- target OS build;
-- raw benchmark output;
-- repeated benchmark runs with mean, median, standard deviation, and percentile latency.
+Future revisions should add the original standalone throughput and FT601 benchmark outputs, plus repeated runs with mean, median, standard deviation, and percentile latency.
 
-The current repository intentionally separates measured observations from derived values so later experiments can replace or extend the initial dataset without silently rewriting historical results.
-
-## 9. Security and Responsible Use
+## 10. Security and Responsible Use
 
 External memory acquisition is dual-use. The same low-level access techniques can support digital forensics, incident response, malware analysis, reverse engineering, and vulnerability research, but can also be misused.
 
-This project therefore documents a controlled, read-only research configuration and does not present memory modification, injection, evasion, or exploitation as experimental objectives.
+This report documents a controlled, read-only research configuration and does not present memory modification, injection, persistence, or exploitation as experimental objectives.
 
-## 10. Conclusion
+## 11. Conclusion
 
-The recorded acceptance tests support the feasibility of a reproducible FPGA-assisted read-only memory-acquisition platform for controlled security research. The most important result is not raw bandwidth but the separation of transport, acquisition, validation, and semantic analysis into independently testable layers.
+The preserved command outputs support the feasibility of a read-only FPGA-assisted memory-acquisition workflow in the tested environment. The strongest evidence is the combination of a successful bounded memory read, transaction-level 4-KiB request/completion matching, a completed 0–256 MiB probe with zero recorded retries/exhaustion/protocol failures, and a successful WinAPI-versus-MemProcFS backend consistency test.
 
-Additional repeated measurements and preservation of raw logs are required before making broader statistical performance claims.
+The project should be considered an unpublished technical report with practical reproducibility evidence, not an independently reviewed academic result.
 
 ## References
 
