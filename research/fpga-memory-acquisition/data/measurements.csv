@@ -1,8 +1,16 @@
 metric,value,unit,sample_or_count,status,notes
-DMA sequential read throughput,18.91,MiB/s,Duck's DMA Test,measured,Observed host-side DMA benchmark
-FT601 small-transfer latency,270.58,us,64 B x 500,measured,Average latency from ft601_bench
-256-byte DMA read,PASS,,single acceptance test,measured,Read-only backend acceptance
-4-KiB DMA read,PASS,,single acceptance test,measured,Read-only backend acceptance
-256-MiB probe successful regions,63966,regions,65536 attempted,measured,No retries recorded
-256-MiB probe success rate,97.604,%,63966 / 65536,derived,Derived from measured region counts
-Probe retries,0,retries,256-MiB probe,measured,Retry counter observed as zero
+DMA sequential read throughput,18.91,MiB/s,Duck's DMA Test,pending_source_log,"Earlier project record; exact raw line not present in the five supplied rollout files"
+FT601 small-transfer latency,270.58,us,64 B x 500,pending_source_log,"Earlier project record; exact raw line not present in the five supplied rollout files"
+256-byte physical-memory read,PASS,,single acceptance run,direct_stdout_verified,"PCILeech EXIT=0 and Memory Display returned contents for physical address 0x1000"
+4-KiB MRd32 requests,32,requests,one TLP-level run,direct_stdout_verified,"Counted from recorded command stdout"
+4-KiB CplD completions,32,completions,one TLP-level run,direct_stdout_verified,"Counted from recorded command stdout"
+4-KiB tag sequence,MATCH,,01 through 20,direct_stdout_derived,"TX and RX tag sequences extracted from stdout and compared"
+256-MiB probe successful pages,63966,pages,65536 attempted,direct_stdout_verified,"Final probe stdout"
+256-MiB probe failed pages,1570,pages,65536 attempted,direct_stdout_verified,"Final probe stdout; UR=1570"
+256-MiB page-read rate,97.604,%,63966 / 65536,derived,"Computed from direct stdout counts; console rounded to 97%"
+Probe retries,0,retries,256-MiB probe,direct_stdout_verified,"FPGA read outcomes"
+Probe exhausted,0,reads,256-MiB probe,direct_stdout_verified,"FPGA read outcomes"
+Probe protocol failures,0,events,256-MiB probe,direct_stdout_verified,"FPGA read outcomes"
+WinAPI and MemProcFS DMA backend acceptance,PASS,,single acceptance run,direct_stdout_verified,"Matching PID/module/PE/sections/pattern results"
+ReaderUnitTests,PASS,,Release x64,direct_stdout_verified,"reader_unit_tests: PASS"
+Release x64 build,PASS,,exit code 0,direct_stdout_verified,"app_release_x64=0"
