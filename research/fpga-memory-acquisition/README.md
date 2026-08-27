@@ -1,26 +1,38 @@
 # FPGA-Assisted Memory Acquisition — Technical Report
 
-A small reproducibility package accompanying an **unpublished, non-peer-reviewed technical report** on read-only FPGA-assisted external memory acquisition for controlled Windows security-research environments.
+A reproducibility package accompanying an **unpublished, non-peer-reviewed technical report** on read-only FPGA-assisted external memory acquisition for controlled Windows security-research environments.
 
 ## What is included
 
-- [`paper.md`](paper.md) — the technical report
-- [`data/measurements.csv`](data/measurements.csv) — measured and derived values used in the report
+- [`paper.md`](paper.md) — technical report
+- [`data/measurements.csv`](data/measurements.csv) — measurements with provenance status
+- [`evidence/2026-08-27-acceptance.md`](evidence/2026-08-27-acceptance.md) — sanitized direct stdout extracts and deterministic checks
+- [`evidence/source-rollouts.sha256`](evidence/source-rollouts.sha256) — SHA-256 manifest for the supplied source rollouts
 - [`figures/architecture.svg`](figures/architecture.svg) — experimental architecture
-- [`figures/benchmark-summary.svg`](figures/benchmark-summary.svg) — benchmark summary
+- [`figures/benchmark-summary.svg`](figures/benchmark-summary.svg) — rollout-backed acceptance summary
 - [`STATUS.md`](STATUS.md) — claim/provenance status
 
-## Recorded results
+## Rollout-backed results
 
-- DMA read throughput: **18.91 MiB/s**
-- FT601 64-byte transfer latency: **270.58 µs average across 500 iterations**
-- 256-byte DMA read: **PASS**
-- 4-KiB DMA read: **PASS**
-- 256-MiB probe: **63,966 / 65,536 successful regions**
-- Derived success rate: **97.604%**
-- Recorded retries: **0**
+The supplied JSONL contains direct command-output evidence for the following:
 
-These values are presented as observations from the recorded project acceptance tests, not as universal PCILeech/FT601 performance claims.
+- 256-byte physical-memory read: **PASS** (`Memory Display: Contents for address: 0x1000`)
+- 4-KiB TLP validation: **32 MRd32 / 32 CplD**, tags `01` through `20` matched in sequence
+- 0–256 MiB probe: **63,966 / 65,536 pages read**
+- Probe failures/UR: **1,570**
+- Derived page-read rate: **97.604%**
+- `retry=0`, `exhausted=0`, `protocol=0`
+- WinAPI and MemProcFS DMA backend acceptance: **PASS** with matching PID/module/PE/section/pattern results
+- Release x64 build and ReaderUnitTests: **PASS**
+
+## Additional project measurements awaiting attached source logs
+
+Two earlier project measurements are preserved in the dataset but are **not treated as rollout-backed evidence yet**, because their exact raw lines were not found in the five supplied rollout files:
+
+- DMA throughput: `18.91 MiB/s`
+- FT601 64-byte average latency: `270.58 µs` across 500 iterations
+
+They should be promoted to direct-evidence status only after the originating benchmark output is attached.
 
 ## Research scope
 
