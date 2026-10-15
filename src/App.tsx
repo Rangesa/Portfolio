@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import './App.css'
+import { translate, resolveInitialLanguage } from './i18n'
+import type { Language } from './i18n'
 
 type PanelKey = 'home' | 'works' | 'about' | 'research' | 'contact'
 type Category = 'all' | 'ai' | 'minecraft' | 'tools'
@@ -141,6 +143,8 @@ function Icon({ name, size = 24 }: { name: IconName; size?: number }) {
 }
 
 function App() {
+  const [language, setLanguage] = useState<Language>(resolveInitialLanguage)
+  const t = (value: string) => translate(value, language)
   const [windows, setWindows] = useState(initialWindows)
   const [selectedProject, setSelectedProject] = useState('wynn')
   const [category, setCategory] = useState<Category>('all')
@@ -148,6 +152,18 @@ function App() {
   const [clock, setClock] = useState(() => new Date())
   const highestZ = useRef(15)
   const drag = useRef<{ key: PanelKey; left: number; top: number; pointerX: number; pointerY: number } | null>(null)
+
+  useEffect(() => {
+    document.documentElement.lang = language
+    document.title = language === 'ja' ? 'Taryou / Rangesa — ポートフォリオ98' : 'Taryou / Rangesa — Portfolio 98'
+    document.querySelector('meta[name="description"]')?.setAttribute('content', language === 'ja'
+      ? 'Taryou / Rangesa のポートフォリオ。AI・MCP、Minecraft Mod、Windowsツール、低レイヤー研究の制作記録。'
+      : 'Portfolio of Taryou / Rangesa: AI & MCP, Minecraft mods, Windows tools, and low-level research.')
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', language === 'ja'
+      ? 'アイデアを、実際に動くものへ。個人開発者 Taryou / Rangesa の制作物。'
+      : 'Ideas, made real. Projects from independent developer Taryou / Rangesa.')
+    try { window.localStorage.setItem('portfolio-language', language) } catch { /* optional storage */ }
+  }, [language])
 
   useEffect(() => {
     const timer = window.setInterval(() => setClock(new Date()), 30_000)
@@ -227,11 +243,11 @@ function App() {
   return (
     <main className="desktop" onClick={() => { if (startOpen) setStartOpen(false) }}>
       <div className="desktop-grain" aria-hidden="true" />
-      <aside className="desktop-shortcuts" aria-label="デスクトップのショートカット">
+      <aside className="desktop-shortcuts" aria-label={t("デスクトップのショートカット")}>
         {shortcuts.map(({ key, label }) => (
           <button type="button" className="desktop-shortcut" key={key} onClick={() => openPanel(key)}>
             <Icon name={panelInfo[key].icon} size={40} />
-            <span>{label}</span>
+            <span>{t(label)}</span>
           </button>
         ))}
         <a className="desktop-shortcut" href={github} target="_blank" rel="noopener noreferrer">
@@ -244,7 +260,7 @@ function App() {
       {panels.map((key) => {
         const state = windows[key]
         if (!state.open || state.minimized) return null
-        const windowTitle = panelInfo[key].title
+        const windowTitle = t(panelInfo[key].title)
         return (
           <section
             key={key}
@@ -256,21 +272,21 @@ function App() {
             <div className="window-titlebar" onPointerDown={(event) => beginDrag(event, key)} onPointerMove={dragMove} onPointerUp={() => { drag.current = null }} onPointerCancel={() => { drag.current = null }}>
               <div className="window-title"><Icon name={panelInfo[key].icon} size={17} /><span>{windowTitle}</span></div>
               <div className="window-actions" onPointerDown={(event) => event.stopPropagation()}>
-                <button className="sys-button" type="button" aria-label={windowTitle + 'を最小化'} title="最小化" onClick={() => setWindows((current) => ({ ...current, [key]: { ...current[key], minimized: true } }))}><span className="min-glyph">_</span></button>
-                <button className="sys-button" type="button" aria-label={windowTitle + 'の表示サイズを切り替え'} title="最大化/元に戻す" onClick={() => toggleMaximize(key)}><span className="max-glyph">{state.maximized ? '❐' : '□'}</span></button>
-                <button className="sys-button" type="button" aria-label={windowTitle + 'を閉じる'} title="閉じる" onClick={() => closePanel(key)}><span className="close-glyph">×</span></button>
+                <button className="sys-button" type="button" aria-label={t('最小化') + ': ' + windowTitle} title={t("最小化")} onClick={() => setWindows((current) => ({ ...current, [key]: { ...current[key], minimized: true } }))}><span className="min-glyph">_</span></button>
+                <button className="sys-button" type="button" aria-label={t('最大化/元に戻す') + ': ' + windowTitle} title={t("最大化/元に戻す")} onClick={() => toggleMaximize(key)}><span className="max-glyph">{state.maximized ? '❐' : '□'}</span></button>
+                <button className="sys-button" type="button" aria-label={t('閉じる') + ': ' + windowTitle} title={t("閉じる")} onClick={() => closePanel(key)}><span className="close-glyph">×</span></button>
               </div>
             </div>
 
-            <div className="menu-bar" aria-label="ウィンドウメニュー">
-              <button type="button" onClick={() => openPanel('home')}>ホーム(H)</button>
-              <button type="button" onClick={() => openPanel('works')}>制作物(W)</button>
-              <button type="button" onClick={() => openPanel('about')}>自己紹介(A)</button>
-              <button type="button" onClick={() => openPanel('contact')}>連絡先(C)</button>
+            <div className="menu-bar" aria-label={t("ウィンドウメニュー")}>
+              <button type="button" onClick={() => openPanel('home')}>{t("ホーム(H)")}</button>
+              <button type="button" onClick={() => openPanel('works')}>{t("制作物(W)")}</button>
+              <button type="button" onClick={() => openPanel('about')}>{t("自己紹介(A)")}</button>
+              <button type="button" onClick={() => openPanel('contact')}>{t("連絡先(C)")}</button>
             </div>
 
             {(key === 'home' || key === 'works' || key === 'research') && (
-              <div className="address-bar"><span>アドレス</span><span className="address-path"><Icon name="folder" size={15} /> C:\Rangesa\{key === 'home' ? 'Portfolio' : key === 'works' ? 'Projects' : 'Research'}</span></div>
+              <div className="address-bar"><span>{t("アドレス")}</span><span className="address-path"><Icon name="folder" size={15} /> C:\Rangesa\{key === 'home' ? 'Portfolio' : key === 'works' ? 'Projects' : 'Research'}</span></div>
             )}
 
             <div className="window-scroll">
@@ -279,15 +295,15 @@ function App() {
                   <div className="welcome-hero">
                     <div className="welcome-copy">
                       <p className="eyebrow">INDEPENDENT DEVELOPER / JAPAN</p>
-                      <h1>アイデアを、<br /><span>実際に動くものへ。</span></h1>
+                      <h1>{t("アイデアを、")}<br /><span>{t("実際に動くものへ。")}</span></h1>
                       <p className="hero-lead">Taryou / Rangesa</p>
-                      <p className="hero-description">AIとソフトウェア、ゲーム、低レイヤー。興味の境界を越えて、作って、試して、改善しています。</p>
+                      <p className="hero-description">{t("AIとソフトウェア、ゲーム、低レイヤー。興味の境界を越えて、作って、試して、改善しています。")}</p>
                       <div className="hero-actions">
-                        <button type="button" className="retro-button action-primary" onClick={() => openPanel('works')}><Icon name="folder" size={18} /> 制作物を見る <span aria-hidden="true">→</span></button>
+                        <button type="button" className="retro-button action-primary" onClick={() => openPanel('works')}><Icon name="folder" size={18} /> {t("制作物を見る")} <span aria-hidden="true">→</span></button>
                         <a className="retro-button" href={github} target="_blank" rel="noopener noreferrer"><Icon name="globe" size={18} /> GitHub ↗</a>
                       </div>
                     </div>
-                    <div className="boot-screen" aria-label="開発領域の紹介">
+                    <div className="boot-screen" aria-label={t("開発領域の紹介")}>
                       <div className="boot-top">TARYOU SYSTEM / 2026</div>
                       <div className="boot-terminal">
                         <span className="terminal-line">C:\&gt; whoami</span>
@@ -306,27 +322,27 @@ function App() {
                       <button type="button" className="featured-row" key={project.id} onClick={() => { setCategory('all'); setSelectedProject(project.id); openPanel('works') }}>
                         <span className="featured-index">0{index + 1}</span>
                         <Icon name={project.icon} size={30}/>
-                        <span className="featured-main"><strong>{project.name}</strong><small>{project.line}</small></span>
+                        <span className="featured-main"><strong>{project.name}</strong><small>{t(project.line)}</small></span>
                         <span className="featured-type">{project.kind}</span>
                         <span className="featured-arrow" aria-hidden="true">↗</span>
                       </button>
                     ))}
                   </div>
-                  <div className="bottom-note"><span>実績は公開リポジトリから確認できます。</span><button type="button" className="text-link" onClick={() => openPanel('works')}>すべての作品を見る →</button></div>
+                  <div className="bottom-note"><span>{t("実績は公開リポジトリから確認できます。")}</span><button type="button" className="text-link" onClick={() => openPanel('works')}>{t("すべての作品を見る →")}</button></div>
                 </div>
               )}
 
               {key === 'works' && (
                 <div className="works-view">
-                  <div className="panel-heading"><div><p className="eyebrow">PROJECT DIRECTORY</p><h2>制作物 <small>/{projectCount} files</small></h2><p>公開中のソースコードと技術的な取り組みです。項目を選ぶと詳細を表示します。</p></div></div>
-                  <div className="folder-tabs" aria-label="作品カテゴリ">
+                  <div className="panel-heading"><div><p className="eyebrow">PROJECT DIRECTORY</p><h2>{t("制作物")} <small>/{projectCount} files</small></h2><p>{t("公開中のソースコードと技術的な取り組みです。項目を選ぶと詳細を表示します。")}</p></div></div>
+                  <div className="folder-tabs" aria-label={t("作品カテゴリ")}>
                     {([['all', 'すべて'], ['ai', 'AI / MCP'], ['minecraft', 'Minecraft'], ['tools', 'Windowsツール']] as [Category, string][]).map(([id, label]) => (
-                      <button key={id} type="button" aria-pressed={category === id} className={category === id ? 'selected' : ''} onClick={() => { setCategory(id); const first = projects.find((project) => id === 'all' || project.category === id); if (first) setSelectedProject(first.id) }}>{label}</button>
+                      <button key={id} type="button" aria-pressed={category === id} className={category === id ? 'selected' : ''} onClick={() => { setCategory(id); const first = projects.find((project) => id === 'all' || project.category === id); if (first) setSelectedProject(first.id) }} >{t(label)}</button>
                     ))}
                   </div>
                   <div className="explorer-grid">
-                    <div className="file-list" aria-label="プロジェクト一覧">
-                      <div className="file-list-heading"><span>名前</span><span>種類</span></div>
+                    <div className="file-list" aria-label={t("プロジェクト一覧")}>
+                      <div className="file-list-heading"><span>{t("名前")}</span><span>{t("種類")}</span></div>
                       {filteredProjects.map((project) => (
                         <button type="button" key={project.id} aria-pressed={selectedProject === project.id} className={'file-entry' + (selectedProject === project.id ? ' selected' : '')} onClick={() => setSelectedProject(project.id)}>
                           <Icon name={project.icon} size={23} />
@@ -336,14 +352,14 @@ function App() {
                       ))}
                     </div>
                     <article className="file-preview" aria-live="polite">
-                      <div className="preview-label">ファイルの詳細 / PREVIEW</div>
+                      <div className="preview-label">{t("ファイルの詳細 / PREVIEW")}</div>
                       <div className="preview-title"><Icon name={chosenProject.icon} size={40}/><div><h3>{chosenProject.name}</h3><span>{chosenProject.kind}</span></div></div>
-                      <p className="preview-lead">{chosenProject.line}</p>
-                      <p>{chosenProject.description}</p>
-                      <h4>主な実装</h4>
-                      <ul className="checklist">{chosenProject.highlights.map((item) => <li key={item}>{item}</li>)}</ul>
+                      <p className="preview-lead">{t(chosenProject.line)}</p>
+                      <p>{t(chosenProject.description)}</p>
+                      <h4>{t("主な実装")}</h4>
+                      <ul className="checklist">{chosenProject.highlights.map((item) => <li key={item}>{t(item)}</li>)}</ul>
                       <div className="skill-tags">{chosenProject.stack.map((item) => <span key={item}>{item}</span>)}</div>
-                      <a className="retro-button action-primary preview-link" href={chosenProject.url} target="_blank" rel="noopener noreferrer"><Icon name="globe" size={18}/> GitHubでソースを見る ↗</a>
+                      <a className="retro-button action-primary preview-link" href={chosenProject.url} target="_blank" rel="noopener noreferrer"><Icon name="globe" size={18}/> {t("GitHubでソースを見る ↗")}</a>
                     </article>
                   </div>
                 </div>
@@ -352,18 +368,18 @@ function App() {
               {key === 'about' && (
                 <article className="notepad-view">
                   <div className="notepad-paper">
-                    <p className="mono-top">ABOUT.TXT <span>— 最終編集: 2026</span></p>
-                    <h2>こんにちは、<br />Taryouです。</h2>
-                    <p>個人開発者として、ソフトウェア・AI連携・ゲーム向けツールなどを制作しています。</p>
-                    <p>特に関心があるのは、「人とソフトウェアの間にある面倒な作業」を、シンプルな仕組みで減らすこと。既存の道具を組み合わせるだけでなく、必要なら自分で新しい道具を作ります。</p>
-                    <p>機能だけでなく、動作の軽さ、扱いやすさ、実際に使えることを大切にしています。</p>
+                    <p className="mono-top">ABOUT.TXT <span>{t("— 最終編集: 2026")}</span></p>
+                    <h2>{t("こんにちは、")}<br />{t("Taryouです。")}</h2>
+                    <p>{t("個人開発者として、ソフトウェア・AI連携・ゲーム向けツールなどを制作しています。")}</p>
+                    <p>{t("特に関心があるのは、「人とソフトウェアの間にある面倒な作業」を、シンプルな仕組みで減らすこと。既存の道具を組み合わせるだけでなく、必要なら自分で新しい道具を作ります。")}</p>
+                    <p>{t("機能だけでなく、動作の軽さ、扱いやすさ、実際に使えることを大切にしています。")}</p>
                     <div className="notepad-rule" />
-                    <h3>主な領域</h3>
+                    <h3>{t("主な領域")}</h3>
                     <div className="about-fields">
-                      <div><strong>AI / AUTOMATION</strong><span>MCP、エージェント連携、開発支援</span></div>
-                      <div><strong>GAME / MODDING</strong><span>Minecraft Fabric、ゲームUI、翻訳</span></div>
-                      <div><strong>SYSTEM / RESEARCH</strong><span>Rust、Python、リバースエンジニアリング、FPGA</span></div>
-                      <div><strong>MAKING</strong><span>3Dプリント、ツール制作、試作</span></div>
+                      <div><strong>AI / AUTOMATION</strong><span>{t("MCP、エージェント連携、開発支援")}</span></div>
+                      <div><strong>GAME / MODDING</strong><span>{t("Minecraft Fabric、ゲームUI、翻訳")}</span></div>
+                      <div><strong>SYSTEM / RESEARCH</strong><span>{t("Rust、Python、リバースエンジニアリング、FPGA")}</span></div>
+                      <div><strong>MAKING</strong><span>{t("3Dプリント、ツール制作、試作")}</span></div>
                     </div>
                     <p className="signature">— Taryou / Rangesa</p>
                   </div>
@@ -373,18 +389,18 @@ function App() {
               {key === 'research' && (
                 <div className="research-view">
                   <p className="eyebrow">RESEARCH / DOCUMENTATION</p>
-                  <h2>研究と実験の記録</h2>
-                  <p>動くコードだけでなく、試験方法・計測・制約も残すようにしています。</p>
+                  <h2>{t("研究と実験の記録")}</h2>
+                  <p>{t("動くコードだけでなく、試験方法・計測・制約も残すようにしています。")}</p>
                   <div className="research-document">
                     <div className="research-document-top"><Icon name="drive" size={34}/><div><strong>FPGA-assisted Memory Acquisition</strong><span>Technical report / research package</span></div></div>
-                    <p>管理されたWindowsの研究環境における、読み取り専用の外部メモリ取得に関する技術レポート。再現性のため、実験データ、検証ログ、構成図を整理しています。</p>
-                    <div className="research-caution">状態: 未発表・査読なしの技術報告。公開資料の範囲に基づく記載です。</div>
+                    <p>{t("管理されたWindowsの研究環境における、読み取り専用の外部メモリ取得に関する技術レポート。再現性のため、実験データ、検証ログ、構成図を整理しています。")}</p>
+                    <div className="research-caution">{t("状態: 未発表・査読なしの技術報告。公開資料の範囲に基づく記載です。")}</div>
                     <div className="research-links">
-                      <a className="retro-button action-primary" href={github + '/Portfolio/tree/main/research/fpga-memory-acquisition'} target="_blank" rel="noopener noreferrer">研究資料を開く ↗</a>
-                      <a className="retro-button" href={github + '/Portfolio/blob/main/research/fpga-memory-acquisition/STATUS.md'} target="_blank" rel="noopener noreferrer">検証状況を読む ↗</a>
+                      <a className="retro-button action-primary" href={github + '/Portfolio/tree/main/research/fpga-memory-acquisition'} target="_blank" rel="noopener noreferrer">{t("研究資料を開く ↗")}</a>
+                      <a className="retro-button" href={github + '/Portfolio/blob/main/research/fpga-memory-acquisition/STATUS.md'} target="_blank" rel="noopener noreferrer">{t("検証状況を読む ↗")}</a>
                     </div>
                   </div>
-                  <p className="research-note">※ 研究領域の記載は成果の保証や査読済み論文であることを意味しません。</p>
+                  <p className="research-note">{t("※ 研究領域の記載は成果の保証や査読済み論文であることを意味しません。")}</p>
                 </div>
               )}
 
@@ -392,40 +408,44 @@ function App() {
                 <div className="contact-view">
                   <Icon name="mail" size={56}/>
                   <p className="eyebrow">CONTACT / LINKS</p>
-                  <h2>連絡・ソースコード</h2>
-                  <p>制作物の詳細、更新状況、技術的なメモはGitHubからご覧いただけます。</p>
+                  <h2>{t("連絡・ソースコード")}</h2>
+                  <p>{t("制作物の詳細、更新状況、技術的なメモはGitHubからご覧いただけます。")}</p>
                   <a className="retro-button action-primary" href={github} target="_blank" rel="noopener noreferrer"><Icon name="globe" size={20}/> github.com/Rangesa ↗</a>
-                  <p className="contact-disclaimer">個別のメールアドレスは掲載していません。GitHub上の公開情報をご確認ください。</p>
+                  <p className="contact-disclaimer">{t("個別のメールアドレスは掲載していません。GitHub上の公開情報をご確認ください。")}</p>
                 </div>
               )}
             </div>
-            <div className="status-bar"><span>{key === 'works' ? filteredProjects.length + ' 個のオブジェクト' : 'Taryou / Rangesa'}</span><span>Portfolio · © 2026</span></div>
+            <div className="status-bar"><span>{key === 'works' ? filteredProjects.length + ' ' + t('個のオブジェクト') : 'Taryou / Rangesa'}</span><span>Portfolio · © 2026</span></div>
           </section>
         )
       })}
 
       {startOpen && (
-        <nav className="start-menu" aria-label="スタートメニュー" onClick={(event) => event.stopPropagation()}>
+        <nav className="start-menu" aria-label={t("スタートメニュー")} onClick={(event) => event.stopPropagation()}>
           <div className="start-banner"><span>RANGESA<span className="banner-muted">98</span></span></div>
           <div className="start-options">
             <div className="start-user">TARYOU / WORKSTATION</div>
-            {shortcuts.map(({ key, label }) => <button type="button" key={key} onClick={() => openPanel(key)}><Icon name={panelInfo[key].icon} size={23}/><span>{label}</span><span className="menu-chevron">›</span></button>)}
+            {shortcuts.map(({ key, label }) => <button type="button" key={key} onClick={() => openPanel(key)}><Icon name={panelInfo[key].icon} size={23}/><span>{t(label)}</span><span className="menu-chevron">›</span></button>)}
             <div className="start-separator" />
-            <a href={github} target="_blank" rel="noopener noreferrer" onClick={() => setStartOpen(false)}><Icon name="globe" size={23}/><span>GitHubへ移動</span><span className="menu-chevron">↗</span></a>
+            <a href={github} target="_blank" rel="noopener noreferrer" onClick={() => setStartOpen(false)}><Icon name="globe" size={23}/><span>{t("GitHubへ移動")}</span><span className="menu-chevron">↗</span></a>
           </div>
         </nav>
       )}
 
       <footer className="taskbar" onClick={(event) => event.stopPropagation()}>
-        <button type="button" className={'start-button retro-raised' + (startOpen ? ' is-pressed' : '')} aria-expanded={startOpen} aria-controls="start-menu" onClick={() => setStartOpen((current) => !current)}><span className="start-mark"><span/><span/><span/><span/></span> スタート</button>
+        <button type="button" className={'start-button retro-raised' + (startOpen ? ' is-pressed' : '')} aria-expanded={startOpen} aria-controls="start-menu" onClick={() => setStartOpen((current) => !current)}><span className="start-mark"><span/><span/><span/><span/></span> {t("スタート")}</button>
         <span className="taskbar-divider" />
-        <div className="task-buttons" aria-label="開いているウィンドウ">
+        <div className="task-buttons" aria-label={t("開いているウィンドウ")}>
           {panels.filter((key) => windows[key].open).map((key) => {
             const isActive = !windows[key].minimized && windows[key].z === Math.max(...panels.filter((id) => windows[id].open && !windows[id].minimized).map((id) => windows[id].z), 0)
             return <button type="button" key={key} className={'task-button retro-raised' + (isActive ? ' is-pressed' : '')} onClick={() => toggleTask(key)} aria-pressed={isActive}><Icon name={panelInfo[key].icon} size={17}/><span>{panelInfo[key].title}</span></button>
           })}
         </div>
-        <div className="tray"><span className="tray-led" aria-label="ローカル表示" /> <time dateTime={clock.toISOString()}>{clock.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</time></div>
+        <div className="locale-switch" role="group" aria-label={language === 'ja' ? '表示言語' : 'Display language'}>
+          <button type="button" lang="ja" aria-label="日本語" aria-pressed={language === 'ja'} className={language === 'ja' ? 'active' : ''} onClick={() => setLanguage('ja')}>JA</button>
+          <button type="button" lang="en" aria-label="English" aria-pressed={language === 'en'} className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button>
+        </div>
+        <div className="tray"><span className="tray-led" aria-label={t("ローカル表示")} /> <time dateTime={clock.toISOString()}>{clock.toLocaleTimeString(language === 'ja' ? 'ja-JP' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</time></div>
       </footer>
     </main>
   )
