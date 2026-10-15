@@ -249,3 +249,36 @@ button:focus-visible, a:focus-visible { outline: 2px dashed #101d56; outline-off
   .task-button { min-width: 43px; padding-inline: 5px; }
   .task-button span { display: none; }
 }
+
+/* 1990s taskbar language indicator; no external fonts, icons or network calls. */
+.locale-switch {
+  display: flex;
+  flex: none;
+  height: 31px;
+  gap: 1px;
+  padding: 2px;
+  align-items: stretch;
+  background: #a8a8a8;
+  border: 2px solid;
+  border-color: #777 #fff #fff #777;
+}
+.locale-switch button {
+  background: #c0c0c0;
+  color: #333;
+  font: bold 11px Tahoma, sans-serif;
+  min-width: 28px;
+  border: 1px solid transparent;
+  padding: 0 4px;
+}
+.locale-switch button:hover {
+  border-color: #fff #555 #555 #fff;
+}
+.locale-switch button.active {
+  color: #fff;
+  background: #000080;
+  border: 1px dotted #e0e0e0;
+}
+@media (max-width: 720px) {
+  .locale-switch { height: 30px; }
+  .locale-switch button { min-width: 25px; padding: 0 2px; }
+}
